@@ -1,4 +1,4 @@
-Brainfuxk
+Elixir Brainfuck
 =========
 
-** TODO: Add description **
+A brainfuck interpreter in Elixir
