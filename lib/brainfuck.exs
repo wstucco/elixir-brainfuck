@@ -10,10 +10,12 @@ defmodule Brainfuck do
 	@op_lbeg "[" # loop begin
 	@op_lend "]" # loop end
 
-	def run(program), do: run(program, 0, [0], <<>>) 
+	@empty ""
+
+	def run(program), do: run(program, 0, [0], @empty)
 
 	# final condition
-	defp run(<<>>, addr, mem, output), do: {addr, mem, output}
+	defp run(@empty, addr, mem, output), do: {addr, mem, output}
 
 	# commands
 	defp run(@op_vinc <> rest, addr, mem, output) do
@@ -39,9 +41,9 @@ defmodule Brainfuck do
 
 	defp run(@op_lbeg <> rest, addr, mem, output) do
 		case mem |> byte_at addr do
-			0 -> 
+			0 ->
 				run(rest |> jump_to_lend, addr,  mem, output)
-			_ -> 
+			_ ->
 				{a, m, o} = run(rest |> loop_body, addr,  mem, output)
 				run(@op_lbeg <> rest, a, m, o)
 		end
@@ -51,11 +53,11 @@ defmodule Brainfuck do
 		run(rest, addr, mem, output <> (mem |> char_at addr))
 	end
 	defp run(@op_getc <> rest, addr, mem, output) do
-		val = case IO.getn("Input\n", 1) |> to_char_list do
+		val = case IO.getn("Input\n", 1) do
 			:eof -> 0
-			[c]  -> c
+			c    -> c
 		end
-		run(rest, addr, mem |> mod_at(addr, val), output)
+		run(rest, addr, mem |> put_at(addr, val), output)
 	end
 
 
@@ -66,14 +68,14 @@ defmodule Brainfuck do
 	# helpers
 	defp inc_at(list, addr), do: List.update_at(list, addr, &(&1+1 |> rem 255))
 	defp dec_at(list, addr), do: List.update_at(list, addr, &(&1-1 |> rem 255))
-	defp mod_at(list, addr, val), do: List.replace_at(list, addr, val)
+	defp put_at(list, addr, val), do: List.replace_at(list, addr, val)
 
 	defp byte_at(list, addr), do: list |> Enum.at addr
 	defp char_at(list, addr), do: [list |> byte_at addr] |> to_string
 
 	defp match_lend(source), do: match_lend(source, 1, 0)
 	defp match_lend(_, 0, acc), do: acc
-	defp match_lend(<<>>, _, _), do: raise "unbalanced loop"
+	defp match_lend(@empty, _, _), do: raise "unbalanced loop"
 	defp match_lend(@op_lbeg <> rest, depth, acc), do: match_lend(rest, depth+1, acc+1)
 	defp match_lend(@op_lend <> rest, depth, acc), do: match_lend(rest, depth-1, acc+1)
 	defp match_lend(<<_>> <> rest, depth, acc), do: match_lend(rest, depth, acc+1)
