@@ -5,6 +5,7 @@ defmodule Brainfuck.Mixfile do
     [app: :brainfuck,
      version: "0.0.1",
      elixir: "~> 1.0.0",
+     escript: [ main_module: BrainfuckCli ],
      deps: deps]
   end
 
@@ -12,7 +13,7 @@ defmodule Brainfuck.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
+    [ applications: [] ]
   end
 
   # Dependencies can be Hex packages:
