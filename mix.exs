@@ -5,7 +5,7 @@ defmodule Brainfuck.Mixfile do
     [app: :brainfuck,
      version: "0.0.1",
      elixir: "~> 1.0.0",
-     escript: [ main_module: BrainfuckCli ],
+     escript: [ main_module: Brainfuck.CLI ],
      deps: deps]
   end
 
