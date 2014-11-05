@@ -71,11 +71,19 @@ defmodule BrainfuckTest do
     assert output == "CBA321"
   end
 
-  def load_fixture file do
+  test "BF program: show ASCII values of input in unary, separated by spaces." do
+    {_addr, _mem, _input, output} = Brainfuck.run("++++[>++++++++<-],[[>+.-<-]>.<,]", "123ABC")
+    assert output == "#{unary(49)} #{unary(50)} #{unary(51)} #{unary(65)} #{unary(66)} #{unary(67)} "
+  end
+
+  defp load_fixture file do
     case File.read "#{__DIR__}/fixtures/#{file}" do
       {:ok, body}   -> body
       {:error, err} -> raise "error loading file #{file}: #{err}"
     end
   end
+
+  defp unary(val) when is_binary(val), do: unary(val |> to_char_list|> Enum.at 0)
+  defp unary(len), do: String.duplicate("!", len)
 
 end
