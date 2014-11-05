@@ -63,15 +63,14 @@ defmodule Brainfuck do
 		end
 		run(rest, addr, mem |> put_at(addr, val), input, output)
 	end
-	# when input is list, extract the first element as new memeory value
-	defp run(@op_getc <> rest, addr, mem, [head | tail], output) do
-		run(rest, addr, mem |> put_at(addr, head), tail, output)
-	end
 	# when input is a list and is empty, treat it like :eof and insert 0
 	defp run(@op_getc <> rest, addr, mem, [], output) do
 		run(rest, addr, mem |> put_at(addr, 0), [], output)
 	end
-
+	# when input is list, extract the first element as new memeory value
+	defp run(@op_getc <> rest, addr, mem, [head | tail], output) do
+		run(rest, addr, mem |> put_at(addr, head), tail, output)
+	end
 
 	# drop every other character
 	defp run(<<_>> <> rest, addr, mem, input, output), do: run(rest, addr, mem, input, output)
