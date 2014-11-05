@@ -12,57 +12,69 @@ defmodule Brainfuck do
 
 	@empty ""
 
-	def run(program), do: run(program, 0, [0], @empty)
+	def run(program, input \\ :stdio)
+	def run(program, input) when is_binary(input) do
+		run(program, 0, [0], input |> to_char_list, @empty)
+	end
+	def run(program, input), do: run(program, 0, [0], input, @empty)
 
 	# final condition
-	defp run(@empty, addr, mem, output), do: {addr, mem, output}
+	defp run(@empty, addr, mem, input, output), do: {addr, mem, input, output}
 
 	# commands
-	defp run(@op_vinc <> rest, addr, mem, output) do
-		run(rest, addr, mem |> inc_at(addr), output)
+	defp run(@op_vinc <> rest, addr, mem, input, output) do
+		run(rest, addr, mem |> inc_at(addr), input, output)
 	end
-	defp run(@op_vdec <> rest, addr, mem, output) do
-		run(rest, addr,  mem |> dec_at(addr), output)
-	end
-
-	defp run(@op_pinc <> rest, addr, mem, output) when addr + 1 == mem |> length do
-		run(rest, addr+1, mem ++ [0], output)
-	end
-	defp run(@op_pinc <> rest, addr, mem, output) do
-		run(rest, addr+1, mem, output)
+	defp run(@op_vdec <> rest, addr, mem, input, output) do
+		run(rest, addr,  mem |> dec_at(addr), input, output)
 	end
 
-	defp run(@op_pdec <> rest, addr, mem, output) when addr == 0 do
-		run(rest, 0, [0] ++ mem, output)
+	defp run(@op_pinc <> rest, addr, mem, input, output) when addr + 1 == mem |> length do
+		run(rest, addr+1, mem ++ [0], input, output)
 	end
-	defp run(@op_pdec <> rest, addr, mem, output) do
-		run(rest, addr-1, mem, output)
+	defp run(@op_pinc <> rest, addr, mem, input, output) do
+		run(rest, addr+1, mem, input, output)
 	end
 
-	defp run(@op_lbeg <> rest, addr, mem, output) do
+	defp run(@op_pdec <> rest, addr, mem, input, output) when addr == 0 do
+		run(rest, 0, [0] ++ mem, input, output)
+	end
+	defp run(@op_pdec <> rest, addr, mem, input, output) do
+		run(rest, addr-1, mem, input, output)
+	end
+
+	defp run(@op_lbeg <> rest, addr, mem, input, output) do
 		case mem |> byte_at addr do
 			0 ->
-				run(rest |> jump_to_lend, addr,  mem, output)
+				run(rest |> jump_to_lend, addr,  mem, input, output)
 			_ ->
-				{a, m, o} = run(rest |> loop_body, addr,  mem, output)
-				run(@op_lbeg <> rest, a, m, o)
+				{a, m, i, o} = run(rest |> loop_body, addr,  mem, input, output)
+				run(@op_lbeg <> rest, a, m, i, o)
 		end
 	end
 
-	defp run(@op_putc <> rest, addr, mem, output) do
-		run(rest, addr, mem, output <> (mem |> char_at addr))
+	defp run(@op_putc <> rest, addr, mem, input, output) do
+		run(rest, addr, mem, input, output <> (mem |> char_at addr))
 	end
-	defp run(@op_getc <> rest, addr, mem, output) do
+	defp run(@op_getc <> rest, addr, mem, input, output) when input == :stdio do
 		val = case IO.getn("Input\n", 1) do
 			:eof -> 0
 			c    -> c
 		end
-		run(rest, addr, mem |> put_at(addr, val), output)
+		run(rest, addr, mem |> put_at(addr, val), input, output)
+	end
+	# when input is list, extract the first element as new memeory value
+	defp run(@op_getc <> rest, addr, mem, [head | tail], output) do
+		run(rest, addr, mem |> put_at(addr, head), tail, output)
+	end
+	# when input is a list and is empty, treat it like :eof and insert 0
+	defp run(@op_getc <> rest, addr, mem, [], output) do
+		run(rest, addr, mem |> put_at(addr, 0), [], output)
 	end
 
 
 	# drop every other character
-	defp run(<<_>> <> rest, addr, mem, output), do: run(rest, addr, mem, output)
+	defp run(<<_>> <> rest, addr, mem, input, output), do: run(rest, addr, mem, input, output)
 
 
 	# helpers
