@@ -6,7 +6,7 @@ defmodule Brainfuck.CLI do
 	"""
 
   def main(args) do
-    {_addr, _mem, out} = Brainfuck.run File.read! "#{args}"
+    {_addr, _mem, _in, out} = Brainfuck.run File.read! "#{args}"
     IO.write out
   end
 end
