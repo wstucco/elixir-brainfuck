@@ -59,7 +59,7 @@ defmodule Brainfuck do
 	defp run(@op_getc <> rest, addr, mem, input, output) when input == :stdio do
 		val = case IO.getn("Input\n", 1) do
 			:eof -> 0
-			c    -> c
+			c   -> c |> to_char_list |> Enum.at 0 # convert char to byte
 		end
 		run(rest, addr, mem |> put_at(addr, val), input, output)
 	end
