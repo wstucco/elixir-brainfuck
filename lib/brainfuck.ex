@@ -29,7 +29,7 @@ defmodule Brainfuck do
 		run(rest, addr,  mem |> dec_at(addr), input, output)
 	end
 
-	defp run(@op_pinc <> rest, addr, mem, input, output) when addr + 1 == mem |> length do
+	defp run(@op_pinc <> rest, addr, mem, input, output) when addr + 1 == length(mem) do
 		run(rest, addr+1, mem ++ [0], input, output)
 	end
 	defp run(@op_pinc <> rest, addr, mem, input, output) do
