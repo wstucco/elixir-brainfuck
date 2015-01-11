@@ -5,10 +5,13 @@ defmodule Brainfuck.Mixfile do
     [app: :brainfuck,
      version: "0.0.1",
      elixir: "~> 1.0.0",
-     escript: [ main_module: Brainfuck.CLI ],
+     escript: escript,
      deps: deps]
   end
 
+  def escript do
+    [main_module: Brainfuck.CLI]
+  end
   # Configuration for the OTP application
   #
   # Type `mix help compile.app` for more information
