@@ -21,6 +21,11 @@ defmodule BrainfuckTest.CompilerTest do
     assert o |> to_string == source |> Brainfuck.Utils.strip
   end
 
+  test "reverse a string" do
+    {_, _, _, o} = Brainfuck.VM.run Brainfuck.Compiler.compile(">,[>,]<[.<]"), "abcde"
+    assert o |> to_string == "edcba"
+  end
+
   test "fail to compile a program because loop are unbalanced" do
     assert_raise RuntimeError, "unmatched ']'", fn ->
       Brainfuck.Compiler.compile("+[-]]")
