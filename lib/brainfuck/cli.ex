@@ -25,7 +25,7 @@ defmodule Brainfuck.CLI do
 
   def process(:compiler, file, input) do
     ast = Brainfuck.Compiler.compile(File.read!(file))
-    {_, _, _, o} = Brainfuck.VM.run ast, input
+    {_, _, _, o} = Brainfuck.VM.run ast, input # input parsing doesn't work welll yet
     IO.puts o |> to_string
   end
 
