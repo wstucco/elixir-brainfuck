@@ -60,7 +60,7 @@ defmodule Brainfuck.VM do
   end
 
   # reject invalid op codes
-  defp run([op_code | _], addr, mem, input, output), do: raise ~s(invalid op_code #{op_code})
+  defp run([op_code | _], _, _, _, _), do: raise ~s(invalid op_code #{op_code})
 
   # helpers
   defp inc_at(list, addr), do: List.update_at(list, addr, &(&1+1 |> rem 255))
