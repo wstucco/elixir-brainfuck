@@ -5,14 +5,48 @@ defmodule Brainfuck.Utils do
   defp to_bf([], source), do: source
   defp to_bf([h | t], source) do
     case h do
-      :inc_d        -> to_bf(t, source <> "+")
-      :dec_d        -> to_bf(t, source <> "-")
-      :inc_p        -> to_bf(t, source <> ">")
-      :dec_p        -> to_bf(t, source <> "<")
-      :put_c        -> to_bf(t, source <> ".")
-      :get_c        -> to_bf(t, source <> ",")
+      {:add, n}     -> to_bf(t, source <> String.duplicate("+", n))
+      {:sub, n}     -> to_bf(t, source <> String.duplicate("-", n))
+      {:mvr, n}     -> to_bf(t, source <> String.duplicate(">", n))
+      {:mvl, n}     -> to_bf(t, source <> String.duplicate("<", n))
+      :put          -> to_bf(t, source <> ".")
+      :get          -> to_bf(t, source <> ",")
       {:loop, loop} -> to_bf(t, source <>  "[" <> to_bf(loop, <<>>) <> "]")
       _             -> to_bf(t, source)
+    end
+  end
+
+  # translate an AST to its C equivalent
+  def to_c(ast) do
+    """
+    #include <stdio.h>
+    #include <string.h>
+    #include <stdlib.h>
+
+    // initialize the tape with 30,000 zeroes
+    unsigned char mem[30000] = {0};
+
+    // set the pointer to point at the left-most cell of the tape
+    unsigned char p = 0;
+    void main() {
+    """
+    <>
+    to_c(ast, <<>>)
+    <>
+    "}"
+  end
+
+  defp to_c([], source), do: source
+  defp to_c([h | t], source) do
+    case h do
+      {:add, n}     -> to_c(t, source <> "mem[p]+=#{n}; // +\n")
+      {:sub, n}     -> to_c(t, source <> "mem[p]-=#{n}; // -\n")
+      {:mvr, n}     -> to_c(t, source <> "p+=#{n}; // >\n")
+      {:mvl, n}     -> to_c(t, source <> "p-=#{n}; // <\n")
+      :put_c        -> to_c(t, source <> "putchar(mem[p]); // .\n")
+      :get_c        -> to_c(t, source <> "mem[p] = getchar(); // ,\n")
+      {:loop, loop} -> to_c(t, source <>  "while(mem[p]) {  // [\n" <> to_c(loop, <<>>) <> "}  // ] \n")
+      _             -> to_c(t, source)
     end
   end
 

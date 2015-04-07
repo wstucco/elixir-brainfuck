@@ -11,12 +11,12 @@ defmodule Brainfuck.Compiler do
 
   defp compile([ic | tail], ast, stack) do
     case {[ic], stack} do
-      { '+', _ } -> compile tail, ast ++ [:inc_d], stack
-      { '-', _ } -> compile tail, ast ++ [:dec_d], stack
-      { '>', _ } -> compile tail, ast ++ [:inc_p], stack
-      { '<', _ } -> compile tail, ast ++ [:dec_p], stack
-      { '.', _ } -> compile tail, ast ++ [:put_c], stack
-      { ',', _ } -> compile tail, ast ++ [:get_c], stack
+      { '+', _ } -> compile tail, ast ++ [add: 1], stack
+      { '-', _ } -> compile tail, ast ++ [sub: 1], stack
+      { '>', _ } -> compile tail, ast ++ [mvr: 1], stack
+      { '<', _ } -> compile tail, ast ++ [mvl: 1], stack
+      { '.', _ } -> compile tail, ast ++ [:put], stack
+      { ',', _ } -> compile tail, ast ++ [:get], stack
       { '[', _ } -> compile tail, [], [ast] ++ stack
       { ']', [] } -> raise "unmatched ']'"
       { ']', [h | t] } -> compile tail, h ++ [loop: ast], t
